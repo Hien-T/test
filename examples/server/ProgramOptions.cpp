@@ -4,7 +4,7 @@
 #include <vector>
 
 namespace po = boost::program_options;
-namespace demo1
+namespace my_proto
 {
 
 namespace server
@@ -67,5 +67,5 @@ std::uint16_t ProgramOptions::port() const
 
 } // namespace server
 
-} // namespace demo1
+} // namespace my_proto
 

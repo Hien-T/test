@@ -8,7 +8,7 @@
 int main(int argc, const char* argv[])
 {
     try {
-        demo1::client::ProgramOptions options;
+        my_proto::client::ProgramOptions options;
         options.parse(argc, argv);
         if (options.helpRequested()) {
             std::cout << "Usage:\n\t" << argv[0] << " [OPTIONS]\n";
@@ -31,7 +31,7 @@ int main(int argc, const char* argv[])
                 std::cerr << "Termination due to signal " << signum << std::endl;
             });
 
-        demo1::client::Client client(io, options.server(), options.port());
+        my_proto::client::Client client(io, options.server(), options.port());
         if (!client.start()) {
             return -1;
         }

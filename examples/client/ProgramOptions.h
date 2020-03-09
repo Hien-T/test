@@ -5,7 +5,7 @@
 
 #include <boost/program_options.hpp>
 
-namespace demo1
+namespace my_proto
 {
 
 namespace client
@@ -26,4 +26,4 @@ private:
 
 } // namespace client
 
-} // namespace demo1
+} // namespace my_proto

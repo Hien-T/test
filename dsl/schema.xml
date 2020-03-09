@@ -1,339 +1,132 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema name="demo1" endian="big" dslVersion="2">
+<schema name="my_protocol" endian="little" dslVersion="2">
     <fields>
-        <enum name="MsgId" type="uint8" semanticType="messageId" >
-            <validValue name="Ack" val="0" />
-            <validValue name="SimpleInts" val="1" />
-            <validValue name="ScaledInts" val="2" />
-            <validValue name="Floats" val="3" />
-            <validValue name="Enums" val="4" />
-            <validValue name="Sets" val="5" />
-            <validValue name="Bitfields" val="6" />
-            <validValue name="Strings" val="7" />
-            <validValue name="Datas" val="8" />
-            <validValue name="Lists" val="9" />
-            <validValue name="Optionals" val="10" />
-            <validValue name="Variants" val="11" />
+        <string name="GetMsgName" defaultValue="GET" />
+        <string name="SetMsgName" defaultValue="SET" />
+        <string name="GetReportMsgName" defaultValue="GET Report" />
+        <string name="SetReportMsgName" defaultValue="SET Report" />
+
+        <enum name="MsgId" type="uint8" semanticType="messageId" hexAssign="true" >
+            <validValue name="Get" val="0x01" displayName="^GetMsgName" />
+            <validValue name="Set" val="0x02" displayName="^SetMsgName" />
+            <validValue name="GetReport" val="0x81" displayName="^GetReportMsgName" />
+            <validValue name="SetReport" val="0x82" displayName="^SetReportMsgName"/>
+
+            <!-- Complete here -->
         </enum>
+
+        <enum name="Category" type="uint16" hexAssign="true" >
+            <validValue name="Ir" val="0x0001" displayName="IR" />
+            <validValue name="Sensor" val="0x0002" />
+        </enum>
+
+        <enum name="IrAttr" type="uint16" hexAssign="true" displayName="Attribute">
+            <validValue name="Brightness" val="0x0001" />
+            <validValue name="Contrast" val="0x0002" />
+            <validValue name="ContrastEnhancement" val="0x0003" displayName="Contrast Enhancement" />
+            <validValue name="Polarity" val="0x0004" />
+            <validValue name="Version" val="0x0005" />
+        </enum>
+
+        <enum name="SensorAttr" type="uint16" hexAssign="true" displayName="Attribute">
+            <validValue name="Temperature" val="0x0001" />
+            <validValue name="Pressure" val="0x0003" />
+        </enum>
+
+        <int name="Brigthness" type="int32" validRange="[-1000, 1000]" />
+        <int name="Contrast" type="int32" validRange="[0, 2000]" />
+        <int name="Temperature" type="int32" />
+        <int name="Pressure" type="int32" />
+
+        <enum name="Result" type="uint8">
+            <validValue name="Success" val="0" />
+            <validValue name="Failure" val="1" />
+
+            <!-- Fill proper result codes here -->
+        </enum>
+
+        <variant name="CategoryAttr" >
+            <bundle name="Ir">
+                <!--enum reuse="Category" defaultValue="Category.Ir" validValue="Category.Ir" failOnInvalid="true" -->
+		<enum reuse="Category" defaultValue="Category.Ir" failOnInvalid="true" />
+                <enum reuse="IrAttr" name="Attr" />
+            </bundle>
+            <bundle name="Sensor">
+                <!--enum reuse="Category" defaultValue="Category.Sensor" validValue="Category.Sensor" failOnInvalid="true" -->
+                <enum reuse="Category" defaultValue="Category.Sensor" failOnInvalid="true"/>
+                <enum reuse="SensorAttr" name="Attr" />
+            </bundle>
+        </variant>
+
+        <variant name="CategoryAttrData" >
+            <bundle name="Ir">
+                <!--enum reuse="Category" defaultValue="Category.Ir" validValue="Category.Ir" failOnInvalid="true" -->
+                <enum reuse="Category" defaultValue="Category.Ir" failOnInvalid="true" />
+                <variant name="AttrData">
+                    <bundle name="Brightness">
+                        <!--enum reuse="IrAttr" defaultValue="IrAttr.Brightness" validValue="IrAttr.Brightness" failOnInvalid="true" -->
+                        <enum reuse="IrAttr" defaultValue="IrAttr.Brightness" failOnInvalid="true" />
+                        <ref field="Brigthness" name="Val" />
+                    </bundle>    
+                    <bundle name="Contrast">
+                        <!--enum reuse="IrAttr" defaultValue="IrAttr.Contrast" validValue="IrAttr.Contrast" failOnInvalid="true" -->
+                        <enum reuse="IrAttr" defaultValue="IrAttr.Contrast" failOnInvalid="true" />
+                        <ref field="Contrast" name="Val" />
+                    </bundle>  
+            
+                    <!-- Complete here -->
+                </variant>
+            </bundle>
+            <bundle name="Sensor">
+                <!--enum reuse="Category" defaultValue="Category.Sensor" validValue="Category.Sensor" failOnInvalid="true" -->
+                <enum reuse="Category" defaultValue="Category.Sensor" failOnInvalid="true"/>
+                <variant name="AttrData">
+                    <bundle name="Temperature">
+                        <!-- enum reuse="SensorAttr" defaultValue="SensorAttr.Temperature" validValue="SensorAttr.Temperature" failOnInvalid="true" -->
+                        <enum reuse="SensorAttr" defaultValue="SensorAttr.Temperature" failOnInvalid="true" />
+                        <ref field="Temperature" name="Val" />
+                    </bundle>    
+                    <bundle name="Contrast">
+                        <!--enum reuse="SensorAttr" defaultValue="SensorAttr.Pressure" validValue="IrAttr.Pressure" failOnInvalid="true" -->
+                        <enum reuse="SensorAttr" defaultValue="SensorAttr.Pressure" failOnInvalid="true"/>
+                        <ref field="Pressure" name="Val" />
+                    </bundle>  
+            
+                    <!-- Complete sensor attributes and data here -->
+                </variant>
+            </bundle>
+        </variant>
     </fields>
     
     <frame name="Frame">
         <sync name="Sync">
-            <int name="Sync" type="uint16" defaultValue="0xabcd" validValue="0xabcd" failOnInvalid="true"/>
+            <int name="Sync" type="uint8" defaultValue="0xAA" validValue="0xAA" failOnInvalid="true"/>
         </sync>
         <size name="Size">
-            <int name="Size" type="uint16" serOffset="2" displayOffset="2"/>
+            <int name="Size" type="uint8" serOffset="3" displayOffset="3">
+                <description value="Serialized value includes sync, inself and checksum" />
+            </int>
         </size>
         <id name="Id" field="MsgId" />
         <payload name="Data" />
-        <checksum name="Checksum" alg="crc-ccitt" from="Size">
-            <int name="Checksum" type="uint16" />
+        <checksum name="Checksum" alg="sum" from="Size">
+            <int name="Checksum" type="uint8" />
         </checksum>
     </frame>       
     
-    <message name="Ack" id="MsgId.Ack" sender="Server">
-        <ref field="MsgId" />
-    </message>
-    
-    <message name="SimpleInts" id="MsgId.SimpleInts" displayName="Simple Ints" sender="client">
-        <int name="F1" type="int8" defaultValue="1" />        
-        <int name="F2" type="uint8" defaultValue="2" />
-        <int name="F3" type="int16" defaultValue="3" />        
-        <int name="F4" type="uint16" defaultValue="4" />
-        <int name="F5" type="int32" defaultValue="5"/>        
-        <int name="F6" type="uint32" defaultValue="6"/>
-        <int name="F7" type="int64" defaultValue="7"/>        
-        <int name="F8" type="uint64" defaultValue="8"/>
-        <int name="F9" type="intvar" length="4" defaultValue="9" />
-        <int name="F10" type="uintvar" length="4" defaultValue="10" endian="little">
-            <description>
-                Using little endian (LEB-128) to encode this field.
-            </description>
-        </int>
+    <message name="Get" id="MsgId.Get" sender="client" displayName="^GetMsgName">
+        <ref field="CategoryAttr" />
     </message>
 
-    <fields>
-        <int name="Lat" type="int32" units="deg" scaling="1/10000000" displayDecimals="7">
-            <description>
-                Latitude in 1/10^7 of the degrees
-            </description>
-        </int>
-        <int reuse="Lat" name="Lon" description="Longitude in 1/10^7 of the degrees" />
-    </fields>
-
-    <message name="ScaledInts" id="MsgId.ScaledInts" displayName="Scaled Ints" sender="client">
-        <ref field="Lat" />
-        <ref field="Lon" />
-        <int name="Height" type="int32" units="mm" >
-            <description value="Height above ellipsoid in mm" />
-        </int>
-        <int name="SomeScaledVal" type="uint32" scaling="1/100" displayDecimals="2">
-            <description>
-                Some scaled value without units.
-            </description>
-            <displayName value="Some Scaled Value" />
-        </int>
+    <message name="Set" id="MsgId.Set" sender="client" displayName="^SetMsgName">
+        <ref field="CategoryAttrData" />
     </message>
 
-    <message name="Floats" id="MsgId.Floats" sender="client">
-        <float name="Timeout" type="float" units="sec">
-            <special name="Infinite" val="0.0" />
-            <special name="Invalid" val="nan" />
-        </float>        
-        <float name="Distance" type="float" units="m" defaultValue="Invalid">
-            <special name="Infinite" val="inf" />
-            <special name="Invalid" val="nan" />
-        </float>        
+    <message name="GetReport" id="MsgId.GetReport" sender="server" displayName="^GetReportMsgName">
+        <ref field="Result" />
+        <ref field="CategoryAttrData" />
     </message>
 
-    <message name="Enums" id="MsgId.Enums" sender="client">
-        <enum name="F1" type="uint8">
-            <description value="Simple enum with sequential values" />
-            <validValue name="V0" val="0" />
-            <validValue name="V1" val="1" />
-            <validValue name="V2" val="2" />
-        </enum>
-
-        <enum name="F2" type="int16" defaultValue="V3">
-            <description>
-                Enum with signed values
-            </description>
-            <validValue name="V1" val="-1" />
-            <validValue name="V2" val="5" />
-            <validValue name="V3" val="6" />
-            <validValue name="V4" val="7" />
-        </enum>
-
-        <enum name="F3" type="uint32" length="3" defaultValue="V1" hexAssign="true">
-            <description>
-                Enum with non-standard length
-            </description>
-            <validValue name="V1" val="0x010203" />
-            <validValue name="V2" val="0x040506" />
-        </enum>
-
-        <enum name="F4" type="uintvar" length="2">
-            <description>
-                Enum with variable length
-            </description>
-            <validValue name="V1" val="0" />
-            <validValue name="V2" val="128" />
-        </enum>
-    </message>
-
-    <message name="Sets" id="MsgId.Sets" sender="client">
-        <set name="F1" type="uint8">
-            <description value="Sequential 1 byte set" />
-            <bit name="Bit0" idx="0" />
-            <bit name="Bit1" idx="1" />
-            <bit name="Bit2" idx="2" />
-        </set>
-        <set name="F2" length="2">
-            <description value="Non Sequential 2 bytes set" />
-            <bit name="Bit0" idx="0" />
-            <bit name="Bit15" idx="15" defaultValue="true" />
-        </set>
-        <set name="F3" length="3">
-            <description value="Non standard length (3 bytes) set" />
-            <bit name="Bit0" idx="0" />
-            <bit name="Bit2" idx="2" />
-        </set>
-    </message>
-
-    <message name="Bitfields" id="MsgId.Bitfields" sender="client">
-        <bitfield name="F1">
-            <int name="Mem1" type="uint8" bitLength="3" />
-            <set name="Mem2" bitLength="3">
-                <bit name="Bit0" idx="0" />
-                <bit name="Bit1" idx="1" />
-                <bit name="Bit2" idx="2" />
-            </set>
-            <enum name="Mem3" type="uint8" bitLength="2">
-                <validValue name="V1" val="0" />
-                <validValue name="V2" val="3" />
-            </enum>
-        </bitfield>
-    </message>
-
-    <message name="Strings" id="MsgId.Strings" sender="client">
-        <int name="F4Len" type="uint8" description="Detached length of F4." displayReadOnly="true"/>
-        <string name="F1" length="5" description="Fixed length string" />
-        <string name="F2" defaultValue="hello">
-            <description value="Length prefixed string" />
-            <lengthPrefix>
-                <int name="Length" type="uint8" />
-            </lengthPrefix>
-        </string>
-        <string name="F3" zeroTermSuffix="true">
-            <description value="Zero terminated string" />
-        </string>
-        <string name="F4" lengthPrefix="$F4Len">
-            <description value="String with detached length prefix" />
-        </string>
-        <string name="F5" description="String without length limit" />
-    </message>
-
-    <message name="Datas" id="MsgId.Datas" sender="client">
-        <int name="F3Len" type="uint8" description="Detached length of F3." displayReadOnly="true"/>
-        <data name="F1" length="5" description="Fixed length raw data" />
-        <data name="F2" defaultValue="ab cd ef">
-            <description value="Length prefixed raw data" />
-            <lengthPrefix>
-                <int name="Length" type="uint8" />
-            </lengthPrefix>
-        </data>
-        <data name="F3" lengthPrefix="$F3Len">
-            <description value="Data with detached length prefix" />
-        </data>
-        <data name="F4" description="Data without length limit" />
-    </message>
-
-    <message name="Lists" id="MsgId.Lists" sender="client">
-        <int name="F2Count" type="uint8" displayReadOnly="true"/>
-        <list name="F1" count="5">
-            <description value="Fixed size list of int fields" />
-            <element>
-                <int name="Elem" type="uint32" />
-            </element>
-        </list>
-        <list name="F2" countPrefix="$F2Count">
-            <description value="List of int fields with detached count prefix" />
-            <element>
-                <int name="Elem" type="uint32" />
-            </element>
-        </list>
-        <list name="F3">
-            <description>List of bundles prefixed with number of elements</description>
-            <element>
-                <bundle name="Element">
-                    <int name="Mem1" type="uint32" />
-                    <int name="Mem2" type="int32" />
-                </bundle>
-            </element>
-            <countPrefix>
-                <int name="Count" type="uint8" />
-            </countPrefix>
-        </list>
-        <list name="F4">
-            <description>
-                List of bundles prefixed with serialization length.
-                Every element is prefixed with its serialization length as well.
-            </description>
-            <element>
-                <bundle name="Element">
-                    <int name="Mem1" type="uint32" />
-                    <string name="Mem2" />
-                </bundle>
-            </element>
-            <lengthPrefix>
-                <int name="Length" type="uint8" />
-            </lengthPrefix>
-            <elemLengthPrefix>
-                <int name="ElemLength" type="uint8" />
-            </elemLengthPrefix>
-        </list>
-
-        <list name="F5" elemFixedLength="true">
-            <description>
-                List of fixed length bundles prefixed with number of elements.
-                First element is prefixed with the serialization length of the element.
-            </description>
-            <element>
-                <bundle name="Element">
-                    <int name="Mem1" type="uint32" />
-                    <int name="Mem2" type="int32"/>
-                </bundle>
-            </element>
-            <countPrefix>
-                <int name="Count" type="uint8" />
-            </countPrefix>
-            <elemLengthPrefix>
-                <int name="ElemLength" type="uint8" />
-            </elemLengthPrefix>
-        </list>
-    </message>
-
-    <message name="Optionals" id="MsgId.Optionals" sender="client">
-        <set name="Flags" type="uint8">
-            <description value="Flags indicating existence of the fields to follow" />
-            <bit name="F2Exists" idx="0" />
-            <bit name="F3Missing" idx="1" />
-        </set>
-        <optional name="F2" defaultMode="missing" cond="$Flags.F2Exists">
-            <int name="F2" type="uint16" defaultValue="0x1111"/>
-        </optional>
-        <optional name="F3" defaultMode="exist"  cond="!$Flags.F3Missing">
-            <int name="F3" type="uint16" defaultValue="0x2222" />
-        </optional>
-    </message>
-
-    <fields>
-        <int name="PropKey" type="uint8" displayName="Key" failOnInvalid="true" displayReadOnly="true"/>
-        <int name="PropType" reuse="PropKey" displayName="Type" />
-        <int name="PropRemLen" type="uint16" displayName="Length" semanticType="length" displayReadOnly="true"/>
-    </fields>
-
-    <message name="Variants" id="MsgId.Variants" sender="client">
-        <description>
-            To demonstrate usage of variants fields, this message
-            contains a list of heterogatious values implemented using
-            variant field. Every element is a key-value pair.
-        </description>
-        <fields>
-            <list name="Props1">
-                <element>
-                    <variant name="Property">
-                        <bundle name="Prop1">
-                            <int reuse="PropKey" name="Key" defaultValue="1" validValue="1" />
-                            <int name="Val" type="int16" />
-                        </bundle>
-                        <bundle name="Prop2">
-                            <int reuse="PropKey" name="Key" defaultValue="2" validValue="2" />
-                            <int name="Val" type="uint32" />
-                        </bundle>
-                        <bundle name="Prop3">
-                            <int reuse="PropKey" name="Key" defaultValue="3" validValue="3" />
-                            <string name="Val">
-                                <lengthPrefix>
-                                    <int name="Length" type="uint8" />
-                                </lengthPrefix>
-                            </string>
-                        </bundle>
-                    </variant>
-                </element>
-                <countPrefix>
-                    <int name="Count" type="uint8" />
-                </countPrefix>
-            </list>
-            <list name="Props2">
-                <element>
-                    <variant name="Property">
-                        <bundle name="Prop1">
-                            <int reuse="PropType" name="Type" defaultValue="1" validValue="1" />
-                            <ref field="PropRemLen" name="Length" />
-                            <int name="Val" type="int16" />
-                        </bundle>
-                        <bundle name="Prop2">
-                            <int reuse="PropType" name="Type" defaultValue="2" validValue="2" />
-                            <ref field="PropRemLen" name="Length" />
-                            <int name="Val" type="uint32" />
-                        </bundle>
-                        <bundle name="Prop3">
-                            <int reuse="PropType" name="Type" defaultValue="3" validValue="3" />
-                            <ref field="PropRemLen" name="Length" />
-                            <string name="Val" />
-                        </bundle>
-                        <bundle name="UnknownProp">
-                            <int reuse="PropType" name="Type" failOnInvalid="false" />
-                            <ref field="PropRemLen" name="Length" />
-                            <data name="Val" />
-                        </bundle>
-                    </variant>
-                </element>
-                <lengthPrefix>
-                    <int name="Length" type="uint8" />
-                </lengthPrefix>
-            </list>
-        </fields>
-    </message>    
+    <!-- Complete messages here -->
 </schema>
+

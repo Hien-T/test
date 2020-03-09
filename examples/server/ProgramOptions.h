@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <boost/program_options.hpp>
 
-namespace demo1
+namespace my_proto
 {
 
 namespace server
@@ -23,4 +23,4 @@ private:
 
 } // namespace server
 
-} // namespace demo1
+} // namespace my_proto

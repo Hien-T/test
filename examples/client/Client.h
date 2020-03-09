@@ -8,11 +8,11 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 
-#include "demo1/Message.h"
-#include "demo1/input/ClientInputMessages.h"
-#include "demo1/frame/Frame.h"
+#include "my_proto/Message.h"
+#include "my_proto/input/ClientInputMessages.h"
+#include "my_proto/frame/Frame.h"
 
-namespace demo1
+namespace my_proto
 {
 
 namespace client    
@@ -26,12 +26,12 @@ public:
     bool start();
 
     using InputMsg = 
-        demo1::Message<
+        my_proto::Message<
             comms::option::ReadIterator<const std::uint8_t*>,
             comms::option::Handler<Client> 
         >;
 
-    using InAckMsg = demo1::message::Ack<InputMsg>;
+    using InAckMsg = my_proto::message::Ack<InputMsg>;
     
     void handle(InAckMsg& msg);
     void handle(InputMsg&);
@@ -40,16 +40,16 @@ private:
     using Socket = boost::asio::ip::tcp::socket;
 
     using OutputMsg = 
-        demo1::Message<
+        my_proto::Message<
             comms::option::WriteIterator<std::back_insert_iterator<std::vector<std::uint8_t> > >,
             comms::option::LengthInfoInterface,
             comms::option::IdInfoInterface,
             comms::option::NameInterface
         >;
 
-    using AllInputMessages = demo1::input::ClientInputMessages<InputMsg>;
+    using AllInputMessages = my_proto::input::ClientInputMessages<InputMsg>;
 
-    using Frame = demo1::frame::Frame<InputMsg, AllInputMessages>;
+    using Frame = my_proto::frame::Frame<InputMsg, AllInputMessages>;
 
 
     void readDataFromServer();
@@ -74,11 +74,11 @@ private:
     std::string m_server;
     std::uint16_t m_port = 0U;
     Frame m_frame;
-    demo1::MsgId m_sentId = demo1::MsgId_Ack;
+    my_proto::MsgId m_sentId = my_proto::MsgId_Ack;
     boost::array<std::uint8_t, 32> m_readBuf;
     std::vector<std::uint8_t> m_inputBuf;
 };
 
 } // namespace client
 
-} // namespace demo1
+} // namespace my_proto
