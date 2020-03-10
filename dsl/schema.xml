@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema name="my_protocol" endian="little" dslVersion="2">
+<schema name="my_proto" endian="little" dslVersion="2">
     <fields>
         <string name="GetMsgName" defaultValue="GET" />
         <string name="SetMsgName" defaultValue="SET" />

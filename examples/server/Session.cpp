@@ -4,11 +4,11 @@
 #include <iomanip>
 #include <iterator>
 
-#include "demo1/message/Ack.h"
+#include "my_proto/message/Ack.h"
 #include "comms/units.h"
 #include "comms/process.h"
 
-namespace demo1
+namespace my_proto
 {
 
 namespace server
@@ -356,9 +356,9 @@ void Session::processInput()
     }
 }
 
-void Session::sendAck(demo1::MsgId id)
+void Session::sendAck(my_proto::MsgId id)
 {
-    demo1::message::Ack<OutputMsg> msg;
+    my_proto::message::Ack<OutputMsg> msg;
     msg.field_msgId().value() = id;
 
     std::vector<std::uint8_t> outputBuf;
@@ -384,4 +384,4 @@ void Session::sendAck(demo1::MsgId id)
 
 } // namespace server
 
-} // namespace demo1
+} // namespace my_proto

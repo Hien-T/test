@@ -7,11 +7,11 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 
-#include "demo1/Message.h"
-#include "demo1/input/ServerInputMessages.h"
-#include "demo1/frame/Frame.h"
+#include "my_proto/Message.h"
+#include "my_proto/input/ServerInputMessages.h"
+#include "my_proto/frame/Frame.h"
 
-namespace demo1
+namespace my_proto
 {
 
 namespace server
@@ -38,23 +38,23 @@ public:
     void start();
 
     using InputMsg = 
-        demo1::Message<
+        my_proto::Message<
             comms::option::ReadIterator<const std::uint8_t*>,
             comms::option::Handler<Session>,
             comms::option::NameInterface
         >;
 
-    using InSimpleInts = demo1::message::SimpleInts<InputMsg>;
-    using InScaledInts = demo1::message::ScaledInts<InputMsg>;
-    using InFloats = demo1::message::Floats<InputMsg>;
-    using InEnums = demo1::message::Enums<InputMsg>;
-    using InSets = demo1::message::Sets<InputMsg>;
-    using InBitfields = demo1::message::Bitfields<InputMsg>;
-    using InStrings = demo1::message::Strings<InputMsg>;
-    using InDatas = demo1::message::Datas<InputMsg>;
-    using InLists = demo1::message::Lists<InputMsg>;
-    using InOptionals = demo1::message::Optionals<InputMsg>;
-    using InVariants = demo1::message::Variants<InputMsg>;
+    using InSimpleInts = my_proto::message::SimpleInts<InputMsg>;
+    using InScaledInts = my_proto::message::ScaledInts<InputMsg>;
+    using InFloats = my_proto::message::Floats<InputMsg>;
+    using InEnums = my_proto::message::Enums<InputMsg>;
+    using InSets = my_proto::message::Sets<InputMsg>;
+    using InBitfields = my_proto::message::Bitfields<InputMsg>;
+    using InStrings = my_proto::message::Strings<InputMsg>;
+    using InDatas = my_proto::message::Datas<InputMsg>;
+    using InLists = my_proto::message::Lists<InputMsg>;
+    using InOptionals = my_proto::message::Optionals<InputMsg>;
+    using InVariants = my_proto::message::Variants<InputMsg>;
 
     void handle(InSimpleInts& msg);
     void handle(InScaledInts& msg);
@@ -72,19 +72,19 @@ public:
 private:
 
     using OutputMsg = 
-        demo1::Message<
+        my_proto::Message<
             comms::option::WriteIterator<std::back_insert_iterator<std::vector<std::uint8_t> > >,
             comms::option::LengthInfoInterface,
             comms::option::IdInfoInterface
         >;
 
-    using AllInputMessages = demo1::input::ServerInputMessages<InputMsg>;
+    using AllInputMessages = my_proto::input::ServerInputMessages<InputMsg>;
 
-    using Frame = demo1::frame::Frame<InputMsg, AllInputMessages>;
+    using Frame = my_proto::frame::Frame<InputMsg, AllInputMessages>;
 
     void terminateSession();
     void processInput();
-    void sendAck(demo1::MsgId id);
+    void sendAck(my_proto::MsgId id);
 
     Socket m_socket;
     TermCallback m_termCb;    
@@ -98,4 +98,4 @@ using SessionPtr = std::unique_ptr<Session>;
 
 } // namespace server
 
-} // namespace demo1
+} // namespace my_proto
