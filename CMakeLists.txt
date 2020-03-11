@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.5)
-project ("cc.demo1.commsdsl")
+project ("my_prot")
 
 option (DEMO1_NO_EXAMPLES "Disable examples compilation." OFF)
 option (DEMO1_NO_WARN_AS_ERR "Don't treat compilation warnings as errors." OFF)
@@ -24,7 +24,7 @@ if ("${COMMS_TAG}" STREQUAL "")
     set(COMMS_TAG "v2.3.3")
 endif ()
 
-set (VERSION "0.15.3")
+set (VERSION "0.1")
 
 set (COMMSDSL_TGT "commsdsl_tgt")
 if ("${COMMSDSL2COMMS}" STREQUAL "")

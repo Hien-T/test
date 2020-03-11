@@ -33,44 +33,42 @@
             <validValue name="Pressure" val="0x0003" />
         </enum>
 
-        <int name="Brigthness" type="int32" validRange="[-1000, 1000]" />
+        <int name="Brightness" type="int32" validRange="[-1000, 1000]" />
         <int name="Contrast" type="int32" validRange="[0, 2000]" />
         <int name="Temperature" type="int32" />
         <int name="Pressure" type="int32" />
 
-        <enum name="Result" type="uint8">
+        <enum name="Result" type="uint8" defaultValue="Success">
             <validValue name="Success" val="0" />
             <validValue name="Failure" val="1" />
 
             <!-- Fill proper result codes here -->
         </enum>
+        
+        <int name="CategoryKey" type="uint8" failOnInvalid="true" displayName="Category" />
+        <int name="AttrKey" type="uint8" failOnInvalid="true" displayName="Attribute" />
 
         <variant name="CategoryAttr" >
             <bundle name="Ir">
-                <!--enum reuse="Category" defaultValue="Category.Ir" validValue="Category.Ir" failOnInvalid="true" -->
-		<enum reuse="Category" defaultValue="Category.Ir" failOnInvalid="true" />
+                <int reuse="CategoryKey" name="Category" defaultValue="Category.Ir" validValue="Category.Ir" />
                 <enum reuse="IrAttr" name="Attr" />
             </bundle>
             <bundle name="Sensor">
-                <!--enum reuse="Category" defaultValue="Category.Sensor" validValue="Category.Sensor" failOnInvalid="true" -->
-                <enum reuse="Category" defaultValue="Category.Sensor" failOnInvalid="true"/>
+                <int reuse="CategoryKey" name="Category"  defaultValue="Category.Sensor" validValue="Category.Sensor" />
                 <enum reuse="SensorAttr" name="Attr" />
             </bundle>
         </variant>
 
         <variant name="CategoryAttrData" >
             <bundle name="Ir">
-                <!--enum reuse="Category" defaultValue="Category.Ir" validValue="Category.Ir" failOnInvalid="true" -->
-                <enum reuse="Category" defaultValue="Category.Ir" failOnInvalid="true" />
+                <int reuse="CategoryKey" name="Category" defaultValue="Category.Ir" validValue="Category.Ir" />
                 <variant name="AttrData">
                     <bundle name="Brightness">
-                        <!--enum reuse="IrAttr" defaultValue="IrAttr.Brightness" validValue="IrAttr.Brightness" failOnInvalid="true" -->
-                        <enum reuse="IrAttr" defaultValue="IrAttr.Brightness" failOnInvalid="true" />
-                        <ref field="Brigthness" name="Val" />
+                        <int reuse="AttrKey" name="Attr" defaultValue="IrAttr.Brightness" validValue="IrAttr.Brightness" />
+                        <ref field="Brightness" name="Val" />
                     </bundle>    
                     <bundle name="Contrast">
-                        <!--enum reuse="IrAttr" defaultValue="IrAttr.Contrast" validValue="IrAttr.Contrast" failOnInvalid="true" -->
-                        <enum reuse="IrAttr" defaultValue="IrAttr.Contrast" failOnInvalid="true" />
+                        <int reuse="AttrKey" name="Attr" defaultValue="IrAttr.Contrast" validValue="IrAttr.Contrast" />
                         <ref field="Contrast" name="Val" />
                     </bundle>  
             
@@ -78,17 +76,14 @@
                 </variant>
             </bundle>
             <bundle name="Sensor">
-                <!--enum reuse="Category" defaultValue="Category.Sensor" validValue="Category.Sensor" failOnInvalid="true" -->
-                <enum reuse="Category" defaultValue="Category.Sensor" failOnInvalid="true"/>
+                <int reuse="CategoryKey" name="Category" defaultValue="Category.Sensor" validValue="Category.Sensor" />
                 <variant name="AttrData">
                     <bundle name="Temperature">
-                        <!-- enum reuse="SensorAttr" defaultValue="SensorAttr.Temperature" validValue="SensorAttr.Temperature" failOnInvalid="true" -->
-                        <enum reuse="SensorAttr" defaultValue="SensorAttr.Temperature" failOnInvalid="true" />
+                        <int reuse="AttrKey" name="Attr" defaultValue="SensorAttr.Temperature" validValue="SensorAttr.Temperature" />
                         <ref field="Temperature" name="Val" />
                     </bundle>    
-                    <bundle name="Contrast">
-                        <!--enum reuse="SensorAttr" defaultValue="SensorAttr.Pressure" validValue="IrAttr.Pressure" failOnInvalid="true" -->
-                        <enum reuse="SensorAttr" defaultValue="SensorAttr.Pressure" failOnInvalid="true"/>
+                    <bundle name="Pressure">
+                        <int reuse="AttrKey" name="Attr" defaultValue="SensorAttr.Pressure" validValue="SensorAttr.Pressure" />
                         <ref field="Pressure" name="Val" />
                     </bundle>  
             
@@ -125,6 +120,11 @@
     <message name="GetReport" id="MsgId.GetReport" sender="server" displayName="^GetReportMsgName">
         <ref field="Result" />
         <ref field="CategoryAttrData" />
+    </message>
+    
+    <message name="SetReport" id="MsgId.SetReport" sender="server" displayName="^SetReportMsgName">
+        <ref field="Result" />
+        <ref field="CategoryAttr" />
     </message>
 
     <!-- Complete messages here -->

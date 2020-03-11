@@ -44,30 +44,17 @@ public:
             comms::option::NameInterface
         >;
 
-    using InSimpleInts = my_proto::message::SimpleInts<InputMsg>;
-    using InScaledInts = my_proto::message::ScaledInts<InputMsg>;
-    using InFloats = my_proto::message::Floats<InputMsg>;
-    using InEnums = my_proto::message::Enums<InputMsg>;
-    using InSets = my_proto::message::Sets<InputMsg>;
-    using InBitfields = my_proto::message::Bitfields<InputMsg>;
-    using InStrings = my_proto::message::Strings<InputMsg>;
-    using InDatas = my_proto::message::Datas<InputMsg>;
-    using InLists = my_proto::message::Lists<InputMsg>;
-    using InOptionals = my_proto::message::Optionals<InputMsg>;
-    using InVariants = my_proto::message::Variants<InputMsg>;
+    using InGetMsg = my_proto::message::Get<InputMsg>;
+    using InSetMsg = my_proto::message::Set<InputMsg>;
 
-    void handle(InSimpleInts& msg);
-    void handle(InScaledInts& msg);
-    void handle(InFloats& msg);
-    void handle(InEnums& msg);
-    void handle(InSets& msg);
-    void handle(InBitfields& msg);
-    void handle(InStrings& msg);
-    void handle(InDatas& msg);
-    void handle(InLists& msg);
-    void handle(InOptionals& msg);
-    void handle(InVariants& msg);
+    void handle(InGetMsg& msg);
+    void handle(InSetMsg& msg);
     void handle(InputMsg&);
+
+    void setBrightness(std::int32_t val);
+    void setContrast(std::int32_t val);
+    void setTemperature(std::int32_t val);
+    void setPressure(std::int32_t val);
 
 private:
 
@@ -78,13 +65,17 @@ private:
             comms::option::IdInfoInterface
         >;
 
+    using SetReportMsg = my_proto::message::SetReport<OutputMsg>;
+
     using AllInputMessages = my_proto::input::ServerInputMessages<InputMsg>;
 
     using Frame = my_proto::frame::Frame<InputMsg, AllInputMessages>;
 
+    using SetResultType = SetReportMsg::Field_result::ValueType;
+
     void terminateSession();
     void processInput();
-    void sendAck(my_proto::MsgId id);
+    void sendMsg(const OutputMsg& msg);
 
     Socket m_socket;
     TermCallback m_termCb;    
