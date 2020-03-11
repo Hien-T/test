@@ -31,9 +31,9 @@ public:
             comms::option::Handler<Client> 
         >;
 
-    using InAckMsg = my_proto::message::Ack<InputMsg>;
+    using InSetReportMsg = my_proto::message::SetReport<InputMsg>;
     
-    void handle(InAckMsg& msg);
+    void handle(InSetReportMsg& msg);
     void handle(InputMsg&);
 
 private:
@@ -47,6 +47,8 @@ private:
             comms::option::NameInterface
         >;
 
+    using OutSetMsg = my_proto::message::Set<OutputMsg>;
+
     using AllInputMessages = my_proto::input::ClientInputMessages<InputMsg>;
 
     using Frame = my_proto::frame::Frame<InputMsg, AllInputMessages>;
@@ -54,19 +56,12 @@ private:
 
     void readDataFromServer();
     void readDataFromStdin();
-    void sendSimpleInts();
-    void sendScaledInts();
-    void sendFloats();
-    void sendEnums();
-    void sendSets();
-    void sendBitfields();
-    void sendStrings();
-    void sendDatas();
-    void sendLists();
-    void sendOptionals();
-    void sendVariants();
+    void sendSetBrighness();
+    void sendSetContrast();
+    void sendSetTemperature();
+    void sendSetPressure();
     void sendMessage(const OutputMsg& msg);
-    void waitForAck();
+    void waitForResponse();
     void processInput();
 
     Socket m_socket;
@@ -74,7 +69,6 @@ private:
     std::string m_server;
     std::uint16_t m_port = 0U;
     Frame m_frame;
-    my_proto::MsgId m_sentId = my_proto::MsgId_Ack;
     boost::array<std::uint8_t, 32> m_readBuf;
     std::vector<std::uint8_t> m_inputBuf;
 };
