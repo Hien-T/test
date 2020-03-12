@@ -15,9 +15,9 @@
             <!-- Complete here -->
         </enum>
 
-        <enum name="Category" type="uint16" hexAssign="true" >
+        <enum name="Category" type="uint16" hexAssign="true" displayName="Category">
             <validValue name="Ir" val="0x0001" displayName="IR" />
-            <validValue name="Sensor" val="0x0002" />
+            <validValue name="Sensor" val="0x0004" displayName="Sensors"/>
         </enum>
 
         <enum name="IrAttr" type="uint16" hexAssign="true" displayName="Attribute">
@@ -45,8 +45,8 @@
             <!-- Fill proper result codes here -->
         </enum>
         
-        <int name="CategoryKey" type="uint8" failOnInvalid="true" displayName="Category" />
-        <int name="AttrKey" type="uint8" failOnInvalid="true" displayName="Attribute" />
+        <int name="CategoryKey" type="uint16" failOnInvalid="true" displayName="Category" />
+        <int name="AttrKey" type="uint16" failOnInvalid="true" displayName="Attribute" />
 
         <variant name="CategoryAttr" >
             <bundle name="Ir">
@@ -98,7 +98,7 @@
             <int name="Sync" type="uint8" defaultValue="0xAA" validValue="0xAA" failOnInvalid="true"/>
         </sync>
         <size name="Size">
-            <int name="Size" type="uint8" serOffset="3" displayOffset="3">
+            <int name="Size" type="uint16" serOffset="4" displayOffset="4">
                 <description value="Serialized value includes sync, inself and checksum" />
             </int>
         </size>
