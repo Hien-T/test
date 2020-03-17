@@ -1,3 +1,5 @@
 build*
 .vscode
 dsl/schema.xml.orig
+dsl/schema_stable.xml
+dsl/schema_uut.xml

@@ -23,7 +23,7 @@
         <enum name="IrAttr" type="uint16" hexAssign="true" displayName="Attribute">
             <validValue name="Brightness" val="0x0001" />
             <validValue name="Contrast" val="0x0002" />
-            <validValue name="ContrastEnhancement" val="0x0003" displayName="Contrast Enhancement" />
+            <validValue name="ContrastEnhancement" val="0x0003"/>
             <validValue name="Polarity" val="0x0004" />
             <validValue name="Version" val="0x0005" />
         </enum>
@@ -35,6 +35,7 @@
 
         <int name="Brightness" type="int32" validRange="[-1000, 1000]" />
         <int name="Contrast" type="int32" validRange="[0, 2000]" />
+        <int name="ContrastEnhancement" type="int8" validRange="[0, 1]"/>
         <int name="Temperature" type="int32" />
         <int name="Pressure" type="int32" />
 
@@ -70,9 +71,14 @@
                     <bundle name="Contrast">
                         <int reuse="AttrKey" name="Attr" defaultValue="IrAttr.Contrast" validValue="IrAttr.Contrast" />
                         <ref field="Contrast" name="Val" />
-                    </bundle>  
+                    </bundle> 
+                    <!-- Complete here --> 
+                    <bundle name="ContrastEnhancement">
+                        <int reuse="AttrKey" name="Attr" defaultValue="IrAttr.ContrastEnhancement" validValue="IrAttr.ContrastEnhancement" />
+                        <ref field="ContrastEnhancement" name="Val" />
+                    </bundle>
             
-                    <!-- Complete here -->
+                    
                 </variant>
             </bundle>
             <bundle name="Sensor">
