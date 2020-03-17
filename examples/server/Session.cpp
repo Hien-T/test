@@ -50,6 +50,19 @@ public:
 
 template <>
 class SetDispatchHelper<
+        (std::size_t)CategoryAttrData::FieldIdx_ir,
+        (std::size_t)CategoryAttrData::Field_ir::Field_attrData::FieldIdx_contrastEnhancement>
+{
+public:
+    template <typename T>
+    static void dispatch(Session& session, T val)
+    {
+        session.setContrastEnhancement(val);
+    }
+};
+
+template <>
+class SetDispatchHelper<
         (std::size_t)CategoryAttrData::FieldIdx_sensor,
         (std::size_t)CategoryAttrData::Field_sensor::Field_attrData::FieldIdx_temperature>
 {
@@ -110,87 +123,6 @@ public:
 private:
     Session& m_session;
 };
-
-//void printRawData(const std::vector<std::uint8_t>& data)
-//{
-//    std::cout << std::hex;
-//    std::copy(data.begin(), data.end(), std::ostream_iterator<unsigned>(std::cout, " "));
-//    std::cout << std::dec << '\n';
-//}
-
-//struct VariantValueFieldPrinter
-//{
-//    template <typename TField>
-//    void operator()(const TField& field) const
-//    {
-//        printInternal(field, Tag<typename std::decay<decltype(field)>::type>());
-//    }
-
-//private:
-//    struct DataTag{};
-//    struct OneByteIntTag{};
-//    struct OtherTag {};
-
-//    template <typename TField>
-//    using Tag =
-//        typename std::conditional<
-//            comms::field::isArrayList<TField>(),
-//            DataTag,
-//            typename std::conditional<
-//                comms::field::isIntValue<TField>() && (sizeof(typename TField::ValueType) == 1U),
-//                OneByteIntTag,
-//                OtherTag
-//            >::type
-//        >::type;
-
-
-//    template <typename TField>
-//    static void printInternal(const TField& field, DataTag)
-//    {
-//        printRawData(field.value());
-//    }
-
-//    template <typename TField>
-//    static void printInternal(const TField& field, OneByteIntTag)
-//    {
-//        std::cout << static_cast<int>(field.value());
-//    }
-
-//    template <typename TField>
-//    static void printInternal(const TField& field, OtherTag)
-//    {
-//        std::cout << field.value();
-//    }
-//};
-
-//template <typename TField>
-//void printFieldValue(const TField& field)
-//{
-//    VariantValueFieldPrinter()(field);
-//}
-
-//struct VariantPrintHelper
-//{
-//    template <std::size_t TIdx, typename TField>
-//    void operator()(const TField& field) const
-//    {
-//        std::cout << "{" << (unsigned)field.field_key().value() << ", ";
-//        printFieldValue(field.field_val());
-//        std::cout << "}";
-//    }
-//};
-
-//struct Variant2PrintHelper
-//{
-//    template <std::size_t TIdx, typename TField>
-//    void operator()(const TField& field) const
-//    {
-//        std::cout << "{" << (unsigned)field.field_type().value() << ", " <<
-//            field.field_length().value() << ", ";
-//        printFieldValue(field.field_val());
-//        std::cout << "}";
-//    }
-//};
 
 } // namespace
 
@@ -263,6 +195,16 @@ void Session::setContrast(std::int32_t val)
     respMsg.field_result().value() = SetResultType::Success;
     respMsg.field_categoryAttr().initField_ir().field_attr().value() =
             SetReportMsg::Field_categoryAttr::Field_ir::Field_attr::ValueType::Contrast;
+    sendMsg(respMsg);
+}
+
+void Session::setContrastEnhancement(std::int32_t val)
+{
+    std::cout << __FUNCTION__ << ": val=" << val << std::endl;
+    SetReportMsg respMsg;
+    respMsg.field_result().value() = SetResultType::Success;
+    respMsg.field_categoryAttr().initField_ir().field_attr().value() =
+            SetReportMsg::Field_categoryAttr::Field_ir::Field_attr::ValueType::ContrastEnhancement;
     sendMsg(respMsg);
 }
 

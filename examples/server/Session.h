@@ -53,6 +53,7 @@ public:
 
     void setBrightness(std::int32_t val);
     void setContrast(std::int32_t val);
+    void setContrastEnhancement(std::int32_t val);
     void setTemperature(std::int32_t val);
     void setPressure(std::int32_t val);
 
