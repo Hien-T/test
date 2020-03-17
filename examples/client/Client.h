@@ -58,6 +58,7 @@ private:
     void readDataFromStdin();
     void sendSetBrighness();
     void sendSetContrast();
+    void sendSetContrastEnhancement();
     void sendSetTemperature();
     void sendSetPressure();
     void sendMessage(const OutputMsg& msg);

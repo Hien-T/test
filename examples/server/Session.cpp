@@ -50,6 +50,19 @@ public:
 
 template <>
 class SetDispatchHelper<
+        (std::size_t)CategoryAttrData::FieldIdx_ir,
+        (std::size_t)CategoryAttrData::Field_ir::Field_attrData::FieldIdx_contrastEnhancement>
+{
+public:
+    template <typename T>
+    static void dispatch(Session& session, T val)
+    {
+        session.setContrastEnhancement(val);
+    }
+};
+
+template <>
+class SetDispatchHelper<
         (std::size_t)CategoryAttrData::FieldIdx_sensor,
         (std::size_t)CategoryAttrData::Field_sensor::Field_attrData::FieldIdx_temperature>
 {
@@ -263,6 +276,16 @@ void Session::setContrast(std::int32_t val)
     respMsg.field_result().value() = SetResultType::Success;
     respMsg.field_categoryAttr().initField_ir().field_attr().value() =
             SetReportMsg::Field_categoryAttr::Field_ir::Field_attr::ValueType::Contrast;
+    sendMsg(respMsg);
+}
+
+void Session::setContrastEnhancement(std::int32_t val)
+{
+    std::cout << __FUNCTION__ << ": val=" << val << std::endl;
+    SetReportMsg respMsg;
+    respMsg.field_result().value() = SetResultType::Success;
+    respMsg.field_categoryAttr().initField_ir().field_attr().value() =
+            SetReportMsg::Field_categoryAttr::Field_ir::Field_attr::ValueType::ContrastEnhancement;
     sendMsg(respMsg);
 }
 

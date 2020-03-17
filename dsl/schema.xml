@@ -35,14 +35,13 @@
 
         <int name="Brightness" type="int32" validRange="[-1000, 1000]" />
         <int name="Contrast" type="int32" validRange="[0, 2000]" />
-        <int name="ContrastEnhancement" type="int8" validRange="[0, 1]"/>
+        <int name="ContrastEnhancement" type="int32" validRange="[0, 1]"/>
         <int name="Temperature" type="int32" />
         <int name="Pressure" type="int32" />
 
         <enum name="Result" type="uint8" defaultValue="Success">
             <validValue name="Success" val="0" />
             <validValue name="Failure" val="1" />
-
             <!-- Fill proper result codes here -->
         </enum>
         
@@ -72,13 +71,11 @@
                         <int reuse="AttrKey" name="Attr" defaultValue="IrAttr.Contrast" validValue="IrAttr.Contrast" />
                         <ref field="Contrast" name="Val" />
                     </bundle> 
-                    <!-- Complete here --> 
+                    <!-- Complete here -->
                     <bundle name="ContrastEnhancement">
                         <int reuse="AttrKey" name="Attr" defaultValue="IrAttr.ContrastEnhancement" validValue="IrAttr.ContrastEnhancement" />
                         <ref field="ContrastEnhancement" name="Val" />
-                    </bundle>
-            
-                    
+                    </bundle> 
                 </variant>
             </bundle>
             <bundle name="Sensor">

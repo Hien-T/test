@@ -114,6 +114,7 @@ void Client::readDataFromStdin()
         static const SendFunc Map[] = {
             &Client::sendSetBrighness,
             &Client::sendSetContrast,
+            &Client::sendSetContrastEnhancement,
             &Client::sendSetTemperature,
             &Client::sendSetPressure
         };
@@ -148,6 +149,14 @@ void Client::sendSetContrast()
     std::cout << __FUNCTION__ << std::endl;
     OutSetMsg msg;
     msg.field_categoryAttrData().initField_ir().field_attrData().initField_contrast().field_val().value() = 2000;
+    sendMessage(msg);
+}
+
+void Client::sendSetContrastEnhancement()
+{
+    std::cout << __FUNCTION__ << std::endl;
+    OutSetMsg msg;
+    msg.field_categoryAttrData().initField_ir().field_attrData().initField_contrastEnhancement().field_val().value() = 2000;
     sendMessage(msg);
 }
 
