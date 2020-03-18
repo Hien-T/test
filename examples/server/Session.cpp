@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <iterator>
+#include <map>
 
 #include "comms/units.h"
 #include "comms/process.h"
@@ -16,11 +17,85 @@ namespace server
 namespace
 {
 
+using CategoryAttr = Session::InGetMsg::Field_categoryAttr; // Alias to GET message field
 using CategoryAttrData = Session::InSetMsg::Field_categoryAttrData; // Alias to SET message field
 
-template <std::size_t TCategoryIdx, std::size_t TAttrIdx>
-class SetDispatchHelper;
+template <typename std::size_t TCategoryIdx>
+class GetCategoryDispatchHelper
+{
+public:
+    template <typename TField>
+    static void dispatch(Session& session, const TField& field)
+    {
+        static_cast<void>(session);
+        static_cast<void>(field);
+        std::cout << "Proper getX() member function in Session is not implemented!" << std::endl;
+        assert(!"Not Implemented");
+    }
+};
 
+template <>
+class GetCategoryDispatchHelper<(std::size_t)CategoryAttr::FieldIdx_ir>
+{
+public:
+    template <typename TField>
+    static void dispatch(Session& session, const TField& field)
+    {
+        using IrAttr = my_proto::field::IrAttrVal;
+        using GetFunc = void (Session::*)(); // Pointer to getX() member function of Session
+
+        static const std::map<IrAttr, GetFunc> Map = {
+            std::make_pair(IrAttr::Version, &Session::getVersion),
+            std::make_pair(IrAttr::Cbit, &Session::getCbit),
+        };
+
+        auto attr = field.field_attr().value();
+        auto iter = Map.find(attr);
+        if (iter == Map.end()) {
+            std::cout << "Proper getX() member function in Session is not implemented!" << std::endl;
+            assert(!"Not Implemented");
+            return;
+        }
+
+        auto func = iter->second;
+        (session.*func)(); // Call member function;
+    }
+};
+
+class GetCategoryDispatcher
+{
+public:
+    GetCategoryDispatcher(Session& session) : m_session(session) {}
+
+    template <std::size_t TCategoryIdx, typename TField>
+    void operator()(const TField& field)
+    {
+        std::cout << "GetCategoryDispatcher: processing field: " << field.name() << std::endl;
+
+        GetCategoryDispatchHelper<TCategoryIdx>::dispatch(m_session, field);
+    }
+
+private:
+    Session& m_session;
+};
+
+
+// ----------------------------------------
+template <std::size_t TCategoryIdx, std::size_t TAttrIdx>
+class SetDispatchHelper
+{
+public:
+    // Default implementation, if invoked means BUG
+    template <typename T>
+    static void dispatch(Session& session, T val)
+    {
+        static_cast<void>(session);
+        static_cast<void>(val);
+        std::cout << "Proper dispatching for indexes " << TCategoryIdx << " and " << TAttrIdx <<
+            " is not implemented or should no be called" << std::endl;
+        assert(!"Not implemented");
+    }
+};
 
 template <>
 class SetDispatchHelper<
@@ -157,7 +232,9 @@ void Session::handle(InGetMsg& msg)
     static_cast<void>(msg);
     std::cout << "Received GET" << std::endl;
 
-    // TODO: parse the get request
+    // A bit of Template-Meta-Programming to properly dispatch into right getX function
+    // Accessing the vairant field, see my_proto::field::CategoryAttr for reference
+    msg.field_categoryAttr().currFieldExec(GetCategoryDispatcher(*this));
 }
 
 
@@ -227,6 +304,46 @@ void Session::setPressure(std::int32_t val)
     respMsg.field_result().value() = SetResultType::Success;
     respMsg.field_categoryAttr().initField_sensor().field_attr().value() =
             SetReportMsg::Field_categoryAttr::Field_sensor::Field_attr::ValueType::Pressure;
+    sendMsg(respMsg);
+}
+
+void Session::getVersion()
+{
+    std::cout << __FUNCTION__ << std::endl;
+
+    GetReportMsg respMsg;
+    respMsg.field_result().value() = GetResultType::Success;
+    respMsg
+        .field_categoryAttrData() // access CategoryAttrData variant
+        .initField_ir() // Initialize it as IR
+        .field_attrData() // Access AttrData member
+        .initField_version() // Initialize it as Version
+        .field_val() // Access its Val field
+        .value() = "Some Version"; // Assign version string
+    sendMsg(respMsg);
+}
+
+void Session::getCbit()
+{
+    std::cout << __FUNCTION__ << std::endl;
+
+    GetReportMsg respMsg;
+    respMsg.field_result().value() = GetResultType::Success;
+    auto& data =
+        respMsg
+            .field_categoryAttrData() // access CategoryAttrData variant
+            .initField_ir() // Initialize it as IR
+            .field_attrData() // Access AttrData member
+            .initField_cbit() // Initialize it as Cbig
+            .field_val() // Access its Val field
+            .value(); // Access the internal storage (std::vector of int fields);
+
+    assert(data.empty()); // The vector should be empty at the beginning;
+    data.resize(4);
+    data[0].value() = 3;
+    data[1].value() = 12;
+    data[2].value() = 31;
+    data[3].value() = 802;
     sendMsg(respMsg);
 }
 

@@ -31,8 +31,10 @@ public:
             comms::option::Handler<Client> 
         >;
 
+    using InGetReportMsg = my_proto::message::GetReport<InputMsg>;
     using InSetReportMsg = my_proto::message::SetReport<InputMsg>;
     
+    void handle(InGetReportMsg& msg);
     void handle(InSetReportMsg& msg);
     void handle(InputMsg&);
 
@@ -48,6 +50,7 @@ private:
         >;
 
     using OutSetMsg = my_proto::message::Set<OutputMsg>;
+    using OutGetMsg = my_proto::message::Get<OutputMsg>;
 
     using AllInputMessages = my_proto::input::ClientInputMessages<InputMsg>;
 
@@ -61,6 +64,7 @@ private:
     void sendSetContrastEnhancement();
     void sendSetTemperature();
     void sendSetPressure();
+    void sendGetVersion();
     void sendMessage(const OutputMsg& msg);
     void waitForResponse();
     void processInput();
