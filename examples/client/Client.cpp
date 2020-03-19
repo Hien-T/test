@@ -54,10 +54,19 @@ bool Client::start()
     return true;
 }
 
-void Client::handle(InSetReportMsg& msg)
+void Client::handle(InGetReportMsg& msg)
 {
     std::cout << "INFO: Received " << msg.doName() << std::endl;
     // TODO: verify correct response (similar to server detecting what SET operation is performed)
+
+    m_timer.cancel();
+    readDataFromStdin();
+}
+
+void Client::handle(InSetReportMsg& msg)
+{
+    std::cout << "INFO: Received " << msg.doName() << std::endl;
+    // TODO: verify correct response (similar to server detecting what GET operation is performed)
 
     m_timer.cancel();
     readDataFromStdin();
@@ -96,7 +105,7 @@ void Client::readDataFromServer()
 
 void Client::readDataFromStdin()
 {
-    std::cout << "\nEnter (new) SET operation index: " << std::endl;
+    std::cout << "\nEnter (new) operation index: " << std::endl;
     do {
         // Unfortunatelly Windows doesn't provide an easy way to 
         // asynchronously read from stdin with boost::asio,
@@ -112,11 +121,12 @@ void Client::readDataFromStdin()
 
         using SendFunc = void (Client::*)();
         static const SendFunc Map[] = {
-            &Client::sendSetBrighness,
-            &Client::sendSetContrast,
-            &Client::sendSetContrastEnhancement,
-            &Client::sendSetTemperature,
-            &Client::sendSetPressure
+            &Client::sendSetBrighness, // 0
+            &Client::sendSetContrast, // 1
+            &Client::sendSetContrastEnhancement, // 2
+            &Client::sendSetTemperature, // 3
+            &Client::sendSetPressure,  // 4
+            &Client::sendGetVersion,  // 5
         };
         static const std::size_t MapSize = std::extent<decltype(Map)>::value;
         if (MapSize <= sendIdx) {
@@ -176,6 +186,14 @@ void Client::sendSetPressure()
     sendMessage(msg);
 }
 
+void Client::sendGetVersion()
+{
+    std::cout << __FUNCTION__ << std::endl;
+    using Attr = OutGetMsg::Field_categoryAttr::Field_ir::Field_attr::ValueType; // Alias to my_proto::field::IrAttr::ValueType enum;
+    OutGetMsg msg;
+    msg.field_categoryAttr().initField_ir().field_attr().value() = Attr::Version;
+    sendMessage(msg);
+}
 
 void Client::sendMessage(const OutputMsg& msg)
 {

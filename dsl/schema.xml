@@ -26,6 +26,7 @@
             <validValue name="ContrastEnhancement" val="0x0003"/>
             <validValue name="Polarity" val="0x0004" />
             <validValue name="Version" val="0x0005" />
+            <validValue name="Cbit" val="0x0006" />
         </enum>
 
         <enum name="SensorAttr" type="uint16" hexAssign="true" displayName="Attribute">
@@ -51,11 +52,11 @@
         <variant name="CategoryAttr" >
             <bundle name="Ir">
                 <int reuse="CategoryKey" name="Category" defaultValue="Category.Ir" validValue="Category.Ir" />
-                <enum reuse="IrAttr" name="Attr" />
+                <ref field="IrAttr" name="Attr" />
             </bundle>
             <bundle name="Sensor">
                 <int reuse="CategoryKey" name="Category"  defaultValue="Category.Sensor" validValue="Category.Sensor" />
-                <enum reuse="SensorAttr" name="Attr" />
+                <ref field="SensorAttr" name="Attr" />
             </bundle>
         </variant>
 
@@ -76,6 +77,17 @@
                         <int reuse="AttrKey" name="Attr" defaultValue="IrAttr.ContrastEnhancement" validValue="IrAttr.ContrastEnhancement" />
                         <ref field="ContrastEnhancement" name="Val" />
                     </bundle> 
+                    <bundle name="Version">
+                        <int reuse="AttrKey" name="Attr" defaultValue="IrAttr.Version" validValue="IrAttr.Version" />
+                        <string name="Val" />
+                    </bundle>
+                    
+                    <bundle name="Cbit">
+                        <int reuse="AttrKey" name="Attr" defaultValue="IrAttr.Cbit" validValue="IrAttr.Cbit" />
+                        <list name="Val">
+                            <int name="Element" type="int32" />
+                        </list>
+                    </bundle>                    
                 </variant>
             </bundle>
             <bundle name="Sensor">

@@ -57,6 +57,8 @@ public:
     void setTemperature(std::int32_t val);
     void setPressure(std::int32_t val);
 
+    void getVersion();
+    void getCbit();
 private:
 
     using OutputMsg = 
@@ -66,12 +68,14 @@ private:
             comms::option::IdInfoInterface
         >;
 
+    using GetReportMsg = my_proto::message::GetReport<OutputMsg>;
     using SetReportMsg = my_proto::message::SetReport<OutputMsg>;
 
     using AllInputMessages = my_proto::input::ServerInputMessages<InputMsg>;
 
     using Frame = my_proto::frame::Frame<InputMsg, AllInputMessages>;
 
+    using GetResultType = GetReportMsg::Field_result::ValueType;
     using SetResultType = SetReportMsg::Field_result::ValueType;
 
     void terminateSession();
