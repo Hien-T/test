@@ -13,6 +13,177 @@ namespace my_proto
 namespace client
 {
 
+namespace
+{
+using CategoryAttr = Client::InSetReportMsg::Field_categoryAttr; // Alias to SET Report message field
+using CategoryAttrData = Client::InGetReportMsg::Field_categoryAttrData; // Alias to GET Report message field
+
+template <std::size_t TCategoryIdx, std::size_t TAttrIdx>
+class GetReportDispatchHelper
+{
+public:
+    // Default implementation, if invoked means BUG
+    template <typename T>
+    static void dispatch(Client& client, T val)
+    {
+        static_cast<void>(client);
+        static_cast<void>(val);
+        std::cout << "Proper dispatching for indexes " << TCategoryIdx << " and " << TAttrIdx <<
+            " is not implemented or should no be called" << std::endl;
+        assert(!"Not implemented");
+    }
+};
+
+template <>
+class GetReportDispatchHelper<
+        (std::size_t)CategoryAttrData::FieldIdx_ir,
+        (std::size_t)CategoryAttrData::Field_ir::Field_attrData::FieldIdx_version>
+{
+public:
+    template <typename T>
+    static void dispatch(Client& client, T val)
+    {
+        client.getReportVersion(val);
+    }
+};
+
+template <>
+class GetReportDispatchHelper<
+        (std::size_t)CategoryAttrData::FieldIdx_ir,
+        (std::size_t)CategoryAttrData::Field_ir::Field_attrData::FieldIdx_cbit>
+{
+public:
+    template <typename T>
+    static void dispatch(Client& client, T val)
+    {
+        client.getReportCbit(val);
+    }
+};
+
+template <std::size_t TCategoryIdx>
+class GetReportCategoryAttrDispatcher
+{
+public:
+    GetReportCategoryAttrDispatcher(Client& client) : m_client(client) {}
+
+    template <std::size_t TAttrIdx, typename TField>
+    void operator()(const TField& field)
+    {
+        std::cout << "GetReportCategoryAttrDispatcher: processing field: " << field.name() << std::endl;
+        GetReportDispatchHelper<TCategoryIdx, TAttrIdx>::dispatch(m_client,field.field_val().value());
+    }
+private:
+    Client& m_client;
+};
+
+class GetReportCategoryDispatcher
+{
+public:
+    GetReportCategoryDispatcher(Client& client) : m_client(client) {}
+
+    template <std::size_t TCategoryIdx, typename TField>
+    void operator()(const TField& field)
+    {
+        std::cout << "GetReportCategoryDispatcher: processing field: " << field.name() << std::endl;
+        auto& attrData = field.field_attrData(); // Also a variant
+
+        static_cast<void>(field);
+        attrData.currFieldExec(GetReportCategoryAttrDispatcher<TCategoryIdx>(m_client));
+    }
+private:
+    Client& m_client;
+};
+
+
+template <typename std::size_t TCategoryIdx>
+class SetReportCategoryDispatchHelper
+{
+public:
+    template <typename TField>
+    static void dispatch(Client& client, const TField& field)
+    {
+        static_cast<void>(client);
+        static_cast<void>(field);
+        std::cout << "Proper SetReportX() member function in client is not implemented!" << std::endl;
+        assert(!"Not Implemented");
+    }
+};
+
+template <>
+class SetReportCategoryDispatchHelper<(std::size_t)CategoryAttr::FieldIdx_ir>
+{
+public:
+    template <typename TField>
+    static void dispatch(Client& client, const TField& field)
+    {
+        using IrAttr = my_proto::field::IrAttrVal;
+        using SetReportFunc = void (Client::*)(); // Pointer to setReportX() member function of Client
+
+        static const std::map<IrAttr, SetReportFunc> Map = {
+            std::make_pair(IrAttr::Brightness, &Client::setReportBrightness),
+            std::make_pair(IrAttr::Contrast, &Client::setReportContrast),
+            std::make_pair(IrAttr::ContrastEnhancement, &Client::setReportContrastEnhancement),
+        };
+    
+        auto attr = field.field_attr().value();
+        auto iter = Map.find(attr);
+        if (iter == Map.end()) {
+            std::cout << "Proper setReportX() member function in Client is not implemented!" << std::endl;
+            assert(!"Not Implemented");
+            return;
+        }
+
+        auto func = iter->second;
+        (client.*func)(); // Call member function;
+    }
+};
+
+template <>
+class SetReportCategoryDispatchHelper<(std::size_t)CategoryAttr::FieldIdx_sensor>
+{
+public:
+    template <typename TField>
+    static void dispatch(Client& client, const TField& field)
+    {
+        using SensorAttr = my_proto::field::SensorAttrVal;
+        using SetReportFunc = void (Client::*)(); // Pointer to setReportX() member function of Client
+
+        static const std::map<SensorAttr, SetReportFunc> Map = {
+            std::make_pair(SensorAttr::Temperature, &Client::setReportTemperature),
+            std::make_pair(SensorAttr::Pressure, &Client::setReportSetPressure)
+        };
+    
+        auto attr = field.field_attr().value();
+        auto iter = Map.find(attr);
+        if (iter == Map.end()) {
+            std::cout << "Proper setReportX() member function in Client is not implemented!" << std::endl;
+            assert(!"Not Implemented");
+            return;
+        }
+
+        auto func = iter->second;
+        (client.*func)(); // Call member function;
+    }
+};
+
+class SetReportCategoryDispatcher
+{
+public:
+    SetReportCategoryDispatcher(Client& client) : m_client(client) {}
+
+    template <std::size_t TCategoryIdx, typename TField>
+    void operator()(const TField& field)
+    {
+        std::cout << "SetReportCategoryDispatcher: processing field: " << field.name() << std::endl;
+        
+        SetReportCategoryDispatchHelper<TCategoryIdx>::dispatch(m_client, field);
+    }
+
+private:
+    Client& m_client;
+};
+
+} // namespace
 Client::Client(
         boost::asio::io_service& io, 
         const std::string& server,
@@ -56,9 +227,10 @@ bool Client::start()
 
 void Client::handle(InGetReportMsg& msg)
 {
+    static_cast<void>(msg);
     std::cout << "INFO: Received " << msg.doName() << std::endl;
     // TODO: verify correct response (similar to server detecting what SET operation is performed)
-
+    msg.field_categoryAttrData().currFieldExec(GetReportCategoryDispatcher(*this));
     m_timer.cancel();
     readDataFromStdin();
 }
@@ -67,6 +239,7 @@ void Client::handle(InSetReportMsg& msg)
 {
     std::cout << "INFO: Received " << msg.doName() << std::endl;
     // TODO: verify correct response (similar to server detecting what GET operation is performed)
+    msg.field_categoryAttr().currFieldExec(SetReportCategoryDispatcher(*this));
 
     m_timer.cancel();
     readDataFromStdin();
@@ -127,6 +300,7 @@ void Client::readDataFromStdin()
             &Client::sendSetTemperature, // 3
             &Client::sendSetPressure,  // 4
             &Client::sendGetVersion,  // 5
+            &Client::sendGetCbit //6
         };
         static const std::size_t MapSize = std::extent<decltype(Map)>::value;
         if (MapSize <= sendIdx) {
@@ -193,6 +367,54 @@ void Client::sendGetVersion()
     OutGetMsg msg;
     msg.field_categoryAttr().initField_ir().field_attr().value() = Attr::Version;
     sendMessage(msg);
+}
+void Client::sendGetCbit()
+{
+    std::cout << __FUNCTION__ << std::endl;
+    using Attr = OutGetMsg::Field_categoryAttr::Field_ir::Field_attr::ValueType; // Alias to my_proto::field::IrAttr::ValueType enum;
+    OutGetMsg msg;
+    msg.field_categoryAttr().initField_ir().field_attr().value() = Attr::Cbit;
+    sendMessage(msg);
+}
+
+void Client::setReportBrightness()
+{
+    std::cout << __FUNCTION__ << std::endl;
+}
+
+void Client::setReportContrast()
+{
+    std::cout << __FUNCTION__ << std::endl;
+}  
+    
+void Client::setReportContrastEnhancement()
+{
+    std::cout << __FUNCTION__ << std::endl;
+} 
+
+void Client::setReportTemperature()
+{
+    std::cout << __FUNCTION__ << std::endl;
+}
+    
+void Client::setReportSetPressure()
+{
+    std::cout << __FUNCTION__ << std::endl;
+}
+
+void Client::getReportVersion(auto &val)
+{
+     std::cout << __FUNCTION__ << ": val=" << val << std::endl;
+}
+    
+void Client::getReportCbit(auto &data)
+{
+     std::cout << __FUNCTION__ << std::endl;
+
+    for(int i=0; i < static_cast<int> (data.size());++i)
+    {
+        std::cout<< "data["<<std::dec <<i<<"] ="<<data[i].value()<<std::endl;
+    }
 }
 
 void Client::sendMessage(const OutputMsg& msg)

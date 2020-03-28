@@ -38,6 +38,16 @@ public:
     void handle(InSetReportMsg& msg);
     void handle(InputMsg&);
 
+    void setReportBrightness();   
+    void setReportContrast();     
+    void setReportContrastEnhancement(); 
+
+    void setReportTemperature();
+    void setReportSetPressure();
+
+    void getReportVersion(auto &val);
+    void getReportCbit(auto &data);
+
 private:
     using Socket = boost::asio::ip::tcp::socket;
 
@@ -65,6 +75,7 @@ private:
     void sendSetTemperature();
     void sendSetPressure();
     void sendGetVersion();
+    void sendGetCbit();
     void sendMessage(const OutputMsg& msg);
     void waitForResponse();
     void processInput();
